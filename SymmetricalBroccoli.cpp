@@ -540,6 +540,7 @@ PLUGIN_API int XPluginStart(char * outName,
     u_long mode = 1;
     if (ioctlsocket(sock, FIONBIO, &mode) != NO_ERROR) {
         report_socket_error("ioctlsocket");
+        CLOSESOCKET(sock);
         return 0;
     }
 #endif
