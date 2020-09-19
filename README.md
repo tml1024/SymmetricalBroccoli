@@ -34,5 +34,5 @@ Why didn't I just use OpenTrack instead? I love to code, and it was
 more fun to start from scratch to make something minimal but
 sufficient. After one evening I had something that basically worked. I
 had a look at the OpenTrack [source
-code](https://github.com/opentrack/opentrack.git)x and it seemd quite
+code](https://github.com/opentrack/opentrack.git) and it seemed quite
 over-engineered for my simple needs.
