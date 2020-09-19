@@ -75,6 +75,7 @@
 			buildPhases = (
 				D607B19609A556E400699BC3 /* Sources */,
 				D607B19709A556E400699BC3 /* Frameworks */,
+				BE512CAE2516A88900921C15 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -112,6 +113,26 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		BE512CAE2516A88900921C15 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\ncp $BUILT_PRODUCTS_DIR/$EXECUTABLE_NAME $PROJECT_DIR\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		D607B19609A556E400699BC3 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -128,7 +149,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
@@ -206,7 +227,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
