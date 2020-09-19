@@ -38,3 +38,29 @@ sufficient. After one evening I had something that basically worked. I
 had a look at the OpenTrack [source
 code](https://github.com/opentrack/opentrack.git) and it seemed quite
 over-engineered for my simple needs.
+
+Build instructions: macOS
+-------------------------
+
+Open the Xcode project file. In the project's Build Settings, change
+the User-Defined setting XPSDK_ROOT to point to where you have the
+X-Plane 3 SDK unpacked. Build. You will end up with
+SymmetricalBroccoli.xpl in the project's top folder.
+
+Copy SymmetricalBroccoli.xpl to the Resources/plugins folder your
+X-Plane 11 installation.
+
+Build instructions: Linux
+-------------------------
+
+Edit the Makefile and change the XPSDK and XP11 values, and other
+things, as appropriate. Run _make install_.
+
+Build instructions: Windows
+---------------------------
+
+Open the Visual Studio project file. Either you need to have the
+X-Plane SDK unpacked as "SDK" in the project folder, or change the
+include and library paths in the project properties. Build. Copy the
+resulting SymmetricalBroccoli.xpl to the Resources\plugins folder your
+X-Plane 11 installation.
