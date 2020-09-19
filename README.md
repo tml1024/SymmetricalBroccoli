@@ -1,7 +1,5 @@
 # SymmetricalBroccoli
 
-This is a work in progress.
-
 This is a plug-in to X-Plane 11 that receives packets over UDP from a
 mobile phone app or other source in the simple format that is used by
 many other head tracking applications.
@@ -14,8 +12,12 @@ One source for such packets is the iOS app [Head
 Tracker](https://apps.apple.com/us/app/head-tracker/id1527710071).
 That is what I use. It is simple and works.
 
+The name is one of those that GitHub automatically suggests. Why not?
+
 Future plans
 ------------
+
+This is a work in progress.
 
 * The filtering of the input needs work.
 * It would be nice to make it work for MSFS, too, or maybe MSFS
