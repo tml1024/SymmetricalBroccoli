@@ -323,6 +323,7 @@ static void log_data(const PoseData &data, float pilot_head_x, float pilot_head_
         strftime(filename, sizeof(filename), "/tmp/%F.%R.%S.log", localtime(&now));
         output = std::ofstream(filename);
         log_stringf("Logging data to %s", filename);
+        been_here = true;
     }
 }
 
