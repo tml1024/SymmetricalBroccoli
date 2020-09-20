@@ -101,13 +101,15 @@ typedef int SOCKET;
 #define PHI 5
 
 // XYZ are in centimetres, X-Plane wants metres. Additionally, exaggerate movement a bit.
+// Head movement: X: left and right, Y: vertical, Z: back and forward.
 #define X_FACTOR  0.015
-#define Y_FACTOR -0.015
-#define Z_FACTOR  0.02
+#define Y_FACTOR -0.010
+#define Z_FACTOR  0.030
 
+// Head turning: PSI: left and right, THE: up and down, PHI: tilt left and right (not used)
 // Angles are in degrees. Turning of the head must be exaggerated more so that you can still see the
-// screen while turning your simulated head to the side.
-#define PSI_FACTOR 2
+// screen while turning your simulated head fully to the side (and even a bit towards the back).
+#define PSI_FACTOR 4
 #define THE_FACTOR 2
 #define PHI_FACTOR 1
 
@@ -312,18 +314,38 @@ static void draw_debug_window(const char *string)
 
 #if DEBUGLOGDATA
 
-static void log_data(const PoseData &data, float pilot_head_x, float pilot_head_y, float pilot_head_z, float pilot_head_psi, float pilot_head_the)
+static void log_data(const std::string kind, const PoseData &data, float pilot_head_x, float pilot_head_y, float pilot_head_z, float pilot_head_psi, float pilot_head_the)
 {
     static bool been_here = false;
-    static std::ofstream output;
+    static FILE *output;
 
     if (!been_here) {
         time_t now = time(NULL);
         char filename[100];
-        strftime(filename, sizeof(filename), "/tmp/%F.%R.%S.log", localtime(&now));
-        output = std::ofstream(filename);
-        log_stringf("Logging data to %s", filename);
+        strftime(filename, sizeof(filename), "/tmp/" MYNAME ".%F.%H.%M.log", localtime(&now));
+        output = fopen(filename, "wt");
+        if (output != NULL)
+            log_stringf("Logging data to %s", filename);
+        else
+            log_stringf("Could not open %s for writing", filename);
         been_here = true;
+    }
+
+    if (output != NULL) {
+        static float first_time = current_time;
+        static float prev_time = current_time;
+
+        fprintf(output, "%6.3f %5.3f %s ", current_time - first_time, current_time - prev_time, kind.c_str());
+        for (int i = 0; i < 3; i++)
+            fprintf(output, "%+6.2f ", data.d[i]);
+        fprintf(output, "  ");
+        for (int i = 3; i < 6; i++)
+            fprintf(output, "%+3.0f ", data.d[i]);
+        fprintf(output, "%+6.3f %+6.3f %+6.3f %+6.1f %+6.1f\n",
+                pilot_head_x, pilot_head_y, pilot_head_z, pilot_head_psi, pilot_head_the);
+
+        if (kind == "rcv")
+            prev_time = current_time;
     }
 }
 
@@ -331,7 +353,7 @@ static void log_data(const PoseData &data, float pilot_head_x, float pilot_head_
 
 static void average_data(double curr_value[6], const double prev_value[6], const float time_diff)
 {
-    constexpr double ALPHA = 0.1;
+    constexpr double ALPHA = 0.4;
 
     const double prev_weight = pow(ALPHA, time_diff);
 
@@ -376,10 +398,6 @@ static void get_and_handle_data()
             return;
         } else {
             got_something = true;
-
-#if DEBUGLOGDATA
-            log_data(data, 0, 0, 0, 0, 0);
-#endif
         }
     }
 
@@ -389,6 +407,10 @@ static void get_and_handle_data()
     // 1026 is the 3D Cockpit
     if (XPLMGetDatai(view_type) != 1026)
         return;
+
+#if DEBUGLOGDATA
+    log_data("rcv", data, 0, 0, 0, 0, 0);
+#endif
 
     static PoseData first_data;
     static float initial_pilot_head_pos[6];
@@ -441,24 +463,29 @@ static void get_and_handle_data()
     free(debug_buf);
 #endif
 
-    XPLMSetDataf(head_x, static_cast<float>((data.d[X] - first_data.d[X]) * X_FACTOR + initial_pilot_head_pos[X]));
-    XPLMSetDataf(head_y, static_cast<float>((data.d[Y] - first_data.d[Y]) * Y_FACTOR + initial_pilot_head_pos[Y]));
-    XPLMSetDataf(head_z, static_cast<float>((data.d[Z] - first_data.d[Z]) * Z_FACTOR + initial_pilot_head_pos[Z]));
-    XPLMSetDataf(head_psi, static_cast<float>((data.d[PSI] - first_data.d[PSI]) * PSI_FACTOR + initial_pilot_head_pos[PSI]));
-    XPLMSetDataf(head_the, static_cast<float>((data.d[THE] - first_data.d[THE]) * THE_FACTOR + initial_pilot_head_pos[THE]));
+    float pilot_head_x = static_cast<float>((data.d[X] - first_data.d[X]) * X_FACTOR + initial_pilot_head_pos[X]);
+    float pilot_head_y = static_cast<float>((data.d[Y] - first_data.d[Y]) * Y_FACTOR + initial_pilot_head_pos[Y]);
+    float pilot_head_z = static_cast<float>((data.d[Z] - first_data.d[Z]) * Z_FACTOR + initial_pilot_head_pos[Z]);
+    float pilot_head_psi = static_cast<float>((data.d[PSI] - first_data.d[PSI]) * PSI_FACTOR + initial_pilot_head_pos[PSI]);
+    float pilot_head_the = static_cast<float>((data.d[THE] - first_data.d[THE]) * THE_FACTOR + initial_pilot_head_pos[THE]);
+
+    XPLMSetDataf(head_x, pilot_head_x);
+    XPLMSetDataf(head_y, pilot_head_y);
+    XPLMSetDataf(head_z, pilot_head_z);
+    XPLMSetDataf(head_psi, pilot_head_psi);
+    XPLMSetDataf(head_the, pilot_head_the);
     // No need to roll the head
-    // XPLMSetDataf(head_phi, (data[PHI] - first_data[PHI]) * PHI_FACTOR + initial_pilot_head_pos[PHI]);
 
     static int num_logs = 0;
     if (num_logs < 100) {
         log_stringf("Setting XYZ=(%.2f,%.2f,%.2f) psi=%d the=%d",
-                    (data.d[X] - first_data.d[X]) * X_FACTOR + initial_pilot_head_pos[X],
-                    (data.d[Y] - first_data.d[Y]) * Y_FACTOR + initial_pilot_head_pos[Y],
-                    (data.d[Z] - first_data.d[Z]) * Z_FACTOR + initial_pilot_head_pos[Z],
-                    static_cast<int>((data.d[PSI] - first_data.d[PSI]) * PSI_FACTOR + initial_pilot_head_pos[PSI]),
-                    static_cast<int>((data.d[THE] - first_data.d[THE]) * THE_FACTOR + initial_pilot_head_pos[THE]));
+                    pilot_head_x, pilot_head_y, pilot_head_z, static_cast<int>(pilot_head_psi), static_cast<int>(pilot_head_the));
         num_logs++;
     }
+
+#if DEBUGLOGDATA
+    log_data("set", data, pilot_head_x, pilot_head_y, pilot_head_z, pilot_head_psi, pilot_head_the);
+#endif
 
     prev_data = data;
     prev_time = current_time;
