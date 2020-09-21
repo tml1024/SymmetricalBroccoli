@@ -109,8 +109,8 @@ typedef int SOCKET;
 // Head turning: PSI: left and right, THE: up and down, PHI: tilt left and right (not used)
 // Angles are in degrees. Turning of the head must be exaggerated more so that you can still see the
 // screen while turning your simulated head fully to the side (and even a bit towards the back).
-#define PSI_FACTOR 4
-#define THE_FACTOR 2
+#define PSI_FACTOR 5
+#define THE_FACTOR 3
 #define PHI_FACTOR 1
 
 #if DEBUGWINDOW
@@ -351,9 +351,9 @@ static void log_data(const std::string kind, const PoseData &data, float pilot_h
 
 #endif
 
-static void average_data(double curr_value[6], const double prev_value[6], const float time_diff)
+static void filter_data(double curr_value[6], const double prev_value[6], const float time_diff)
 {
-    constexpr double ALPHA = 0.4;
+    constexpr double ALPHA = 0.5;
 
     const double prev_weight = pow(ALPHA, time_diff);
 
@@ -451,7 +451,7 @@ static void get_and_handle_data()
     }
 
     const float time_diff = current_time - prev_time;
-    average_data(data.d, prev_data.d, time_diff);
+    filter_data(data.d, prev_data.d, time_diff);
 
 #if DEBUGWINDOW
     static char *debug_buf;
