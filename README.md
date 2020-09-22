@@ -4,7 +4,7 @@ This is a plug-in to X-Plane 11 that receives packets over UDP from a
 mobile phone app or other source in the simple format that is used by
 many other head tracking applications.
 
-Each packet is 56 bytes and consists of six doubles (8-byte floating
+Each packet is 48 bytes and consists of six doubles (8-byte floating
 point numbers): The user head's x, y, z position (in centimetres)
 relative to the phone, and yaw, pitch, and roll angle (in degrees).
 
